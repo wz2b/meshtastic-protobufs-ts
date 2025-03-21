@@ -1,0 +1,8 @@
+{
+  "require": "ts-node/register",
+  "extension": ["ts"],
+  "spec": "test/**/*.ts",
+  "reporter": "mocha-junit-reporter",
+  "reporter-option": ["mochaFile=coverage/junit.xml"],
+  "recursive": true
+}

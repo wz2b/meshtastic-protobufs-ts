@@ -1,0 +1,8 @@
+version: v2
+
+plugins:
+  - local: protoc-gen-es
+    opt: target=js+dts,import_extension=js
+    out: generated
+inputs:
+  - directory: meshtastic

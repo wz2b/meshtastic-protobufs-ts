@@ -1,0 +1,57 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Get latest release tag
+      id: get_latest_tag
+      run: |
+        latest_tag=$(curl -s https://api.github.com/repos/meshtastic/protobufs/releases/latest | jq -r .tag_name)
+        echo "Latest tag: $latest_tag"
+        echo "::set-output name=tag::$latest_tag"
+
+    - name: Checkout latest release
+      run: |
+        git fetch --tags
+        git checkout ${{ steps.get_latest_tag.outputs.tag }}
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Install protoc
+      uses: arduino/setup-protoc@v3
+      with:
+        version: '23.x'
+
+    - name: Generate TypeScript objects
+      run: |
+        mkdir -p generated
+        protoc --plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts --ts_out=generated -I ./proto ./proto/*.proto
+
+    - name: Export generated objects
+      run: |
+        echo "export * from './generated';" > generated/index.ts
+
+    - name: Package library
+      run: npm pack
+
+    - name: Publish to npm
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: npm publish
