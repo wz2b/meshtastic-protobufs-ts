@@ -13,8 +13,6 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-      with:
-        fetch-depth: 0  # <-- this ensures full history and tags
 
     - name: Get latest release tag
       id: get_latest_tag
@@ -23,11 +21,12 @@ jobs:
         echo "Latest tag: $latest_tag"
         echo "tag=$latest_tag" >> "$GITHUB_OUTPUT"
 
-
-    - name: Checkout latest release
-      run: |
-        git fetch --tags
-        git checkout ${{ steps.get_latest_tag.outputs.tag }}
+    - name: Checkout meshtastic/protobufs at latest tag
+      uses: actions/checkout@v3
+      with:
+        repository: meshtastic/protobufs
+        ref: ${{ steps.get_latest_tag.outputs.tag }}
+        path: meshtastic
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
