@@ -1,0 +1,29 @@
+{
+  "name": "mnode-red-meshtastic-protobuf",
+  "version": "1.0.0",
+  "description": "Meshtastic protobuf message parser and generator for Node-RED",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "mocha"
+  },
+  "author": "Christopher Piggott",
+  "license": "GPLv",
+  "dependencies": {
+    "@wz2b/meshtastic-protobuf-core": "^0.0.1"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "^1.50.1",
+    "@bufbuild/protobuf": "^2.2.5",
+    "@bufbuild/protoc-gen-es": "^2.2.5",
+    "@types/chai": "^5.2.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.13.10",
+    "chai": "^5.2.0",
+    "mocha": "^11.1.0",
+    "mocha-junit-reporter": "^2.2.1",
+    "should": "^13.2.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}

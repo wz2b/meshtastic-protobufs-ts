@@ -1,4 +1,4 @@
-import { ServiceEnvelopeSchema } from "../generated/meshtastic/mqtt_pb";
+import { ServiceEnvelopeSchema } from "../../../../generated/meshtastic/mqtt_pb";
 import { create, toBinary, fromBinary } from "@bufbuild/protobuf";
 import should from 'should';
 

@@ -5,4 +5,4 @@ plugins:
     opt: target=js+dts,import_extension=js
     out: generated
 inputs:
-  - directory: meshtastic
+  - directory: ../../.tmp_proto
