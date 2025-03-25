@@ -1,15 +1,17 @@
 {
-  "name": "meshtastic-protobufs-core",
+  "name": "@wz2b/meshtastic-protobuf-core",
   "version": "0.0.1",
   "description": "Typescript and Javascript objects generated from Meshtastic protobufs",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "generate": "buf generate",
-    "test": "mocha"
+    "build": "buf generate && tsc",
+    "clean": "rm -rf generated",
+    "test": "mocha",
+    "prepublishOnly": "npm run build"
   },
   "author": "Christopher Piggott",
   "license": "GPLv3",
+
   "dependencies": {
   },
   "devDependencies": {
@@ -26,8 +28,5 @@
     "should": "^13.2.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
-  },
-  "files": [
-    "generated/"
-  ]
+  }
 }

@@ -1,0 +1,66 @@
+import {NRTSNode} from "../../common/NRTSNode";
+import {UnpackNodeDef} from "./types";
+import { NodeAPI, NodeMessage, NodeMessageInFlow } from "node-red";
+
+class UnpackNode extends NRTSNode {
+    constructor(config: UnpackNodeDef) {
+        super(config);
+        this.on('input', this.input)
+    }
+
+    private async input(
+        msg: NodeMessageInFlow,
+        send: (msgs: NodeMessage | Array<NodeMessage | NodeMessage[] | null>) => void,
+        done: (err?: Error) => void
+    ): Promise<void> {
+        try {
+            const buffer = msg.payload as Buffer;
+
+            if (!Buffer.isBuffer(buffer)) {
+                throw new Error("Payload is not a Buffer");
+            }
+
+            if (buffer.length < 4) {
+                throw new Error("Payload too short to contain header");
+            }
+
+            const startByte = buffer[0];
+            const protocolVersion = buffer[1];
+            const length = buffer.readUInt16BE(2);
+
+            if (startByte !== 0xC0) {
+                throw new Error(`Unexpected start byte: 0x${startByte.toString(16)}`);
+            }
+
+            if (length !== buffer.length - 4) {
+                throw new Error(`Length mismatch: expected ${length} bytes but buffer has ${buffer.length - 4}`);
+            }
+
+            const payload = buffer.subarray(4);
+
+            const ret: NodeMessage & {
+                protocolVersion: number;
+                messageLength: number;
+                topic?: string;
+                original: NodeMessageInFlow;
+            } = {
+                _msgid: msg._msgid,  // ✅ carry it forward
+                payload,
+                protocolVersion,
+                messageLength: length,
+                topic: msg.topic,
+                original: msg
+            };
+
+            send(ret as NodeMessage);
+            done();
+        } catch (err) {
+            done(err instanceof Error ? err : new Error(String(err)));
+        }
+    }
+}
+
+// Register the node with Node-RED
+module.exports = (API: NodeAPI) => {
+    NRTSNode.registerType(API, "meshtastic-unpack", UnpackNode);
+};

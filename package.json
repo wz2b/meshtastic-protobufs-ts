@@ -2,11 +2,15 @@
   "name": "meshtastic-node-red",
   "private": true,
   "workspaces": [
-    "packages/@wz2b/*"
+    "packages/@wz2b/meshtastic-protobuf-core",
+    "packages/@wz2b/node-red-meshtastic-protobuf"
   ],
   "scripts": {
     "build": "npm run build -w @wz2b/meshtastic-core && npm run build -w @wz2b/node-red-meshtastic",
     "test": "npm run test -w @wz2b/meshtastic-core && npm run test -w @wz2b/node-red-meshtastic",
     "pack": "npm pack -w @wz2b/meshtastic-core && npm pack -w @wz2b/node-red-meshtastic"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.13"
   }
 }

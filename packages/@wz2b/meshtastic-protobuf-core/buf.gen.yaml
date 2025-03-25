@@ -3,6 +3,6 @@ version: v2
 plugins:
   - local: protoc-gen-es
     opt: target=js+dts,import_extension=js
-    out: generated
+    out: src/generated
 inputs:
-  - directory: ../../.tmp_proto
+  - directory: src/proto

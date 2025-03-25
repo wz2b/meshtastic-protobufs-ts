@@ -1,11 +1,15 @@
 {
-  "name": "mnode-red-meshtastic-protobuf",
+  "name": "@wz2b/node-red-meshtastic-protobuf",
   "version": "1.0.0",
   "description": "Meshtastic protobuf message parser and generator for Node-RED",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "test": "mocha"
+    "start": "node $NODE_OPTIONS node_modules/node-red/red.js $FLOWS",
+    "dev": "nodemon --watch ~/.node-red/node_modules/node-red-gis-focas2 --ext js,html,json --exec node-red",
+    "build": "tsc && npm run copy_html && npm pack",
+    "copy_html": "copyfiles -u 1 \"./src/**/*.html\" ./dist",
+    "clean": "rm -rf ./dist",
+    "test": "mocha --recursive --require ts-node/register test/*.ts --reporter mocha-junit-reporter --reporter-options mochaFile=coverage/junit.xml"
   },
   "author": "Christopher Piggott",
   "license": "GPLv",
@@ -18,12 +22,28 @@
     "@bufbuild/protoc-gen-es": "^2.2.5",
     "@types/chai": "^5.2.0",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^22.13.10",
     "chai": "^5.2.0",
     "mocha": "^11.1.0",
     "mocha-junit-reporter": "^2.2.1",
     "should": "^13.2.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "node-red": "^4.0.9",
+    "@types/node": "^22.13.13",
+    "@types/node-red": "^1.3.5",
+    "node-red-node-test-helper": "^0.3.4",
+    "sinon": "^20.0.0",
+    "copyfiles": "^2.4.1"
+  },
+
+  "keywords": [
+    "node-red",
+    "meshtastic"
+  ],
+  "node-red": {
+    "nodes": {
+      "meshtastic-unpack": "dist/nodes/unpack/unpack.js"
+    }
   }
+
 }
