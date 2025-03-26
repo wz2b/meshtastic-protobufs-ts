@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5", /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', 'ES2018', 'ES2019', 'ES2020', or 'ESNEXT'. */
-    "module": "CommonJS", /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', 'es2020', or 'ESNext'. */
+    "module": "Node16", /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', 'es2020', or 'ESNext'. */
     "outDir": "./dist",                        /* Redirect output structure to the directory. */
     "strict": true, /* Enable all strict type-checking options. */
     "typeRoots": [ "./types", "./node_modules/@types" ],
@@ -10,6 +10,7 @@
     "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
     "allowJs": true,
 
+    "moduleResolution": "node16",
     "lib": ["ES2020", "DOM"]      // ← this is the key part
   },
   "include": [

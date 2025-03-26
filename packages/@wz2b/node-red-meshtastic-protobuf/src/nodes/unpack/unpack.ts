@@ -38,21 +38,17 @@ class UnpackNode extends NRTSNode {
 
             const payload = buffer.subarray(4);
 
-            const ret: NodeMessage & {
-                protocolVersion: number;
-                messageLength: number;
-                topic?: string;
-                original: NodeMessageInFlow;
-            } = {
-                _msgid: msg._msgid,  // ✅ carry it forward
-                payload,
-                protocolVersion,
-                messageLength: length,
+            send({
+                _msgid: msg._msgid,
                 topic: msg.topic,
-                original: msg
-            };
+                payload: {
+                    protocolVersion: protocolVersion,
+                    messageLength: length,
+                    original: msg,
+                    payload: payload
+                }
 
-            send(ret as NodeMessage);
+            })
             done();
         } catch (err) {
             done(err instanceof Error ? err : new Error(String(err)));

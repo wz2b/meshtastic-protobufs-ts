@@ -1,0 +1,25 @@
+<script type="text/javascript">
+    RED.nodes.registerType('meshtastic-decrypt-payload', {
+        category: 'meshtastic',
+        defaults: {
+            name: { value: "" }
+        },
+        label: function () {
+            return this.name || "meshtastic-decrypt-payload";
+        },
+        inputs: 1,
+        outputs: 1
+    });
+</script>
+
+<!-- edit template -->
+<script type="text/html" data-template-name="meshtastic-decrypt-payload">
+    <div class="form-row">
+        <span>This is your node's configuration page</span>
+    </div>
+</script>
+
+<!-- help text -->
+<script type="text/markdown" data-help-name="meshtastic-decrypt-payload">
+    This is your node's help text.
+</script>

@@ -26,3 +26,9 @@ jobs:
 
       - name: 🛠 Build all packages
         run: npm run build
+
+      - name: 💾 Upload packed artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: meshtastic-tgz
+          path: '*.tgz'

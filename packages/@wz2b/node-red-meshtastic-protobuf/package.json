@@ -41,7 +41,9 @@
   ],
   "node-red": {
     "nodes": {
-      "meshtastic-unpack": "dist/nodes/unpack/unpack.js"
+      "meshtastic-unpack": "dist/nodes/unpack/unpack.js",
+      "parse-envelope": "dist/nodes/parse-envelope/parse-envelope.js",
+      "mestastic-decrypt-payload": "dist/nodes/decrypt-payload/decrypt-payload.js"
     }
   }
 
