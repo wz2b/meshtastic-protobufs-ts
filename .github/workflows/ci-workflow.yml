@@ -30,8 +30,14 @@ jobs:
       - name: 📦 Pack all packages
         run: npm run pack
 
-      - name: 💾 Upload packed artifacts
+      - name: 💾 Upload meshtastic-protobuf-core artifact
         uses: actions/upload-artifact@v4
         with:
-          name: meshtastic-tgz
-          path: '*.tgz'
+          name: meshtastic-protobuf-core
+          path: '@wz2b/meshtastic-protobuf-core/*.tgz'
+
+      - name: 💾 Upload node-red-meshtastic-protobuf artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-red-meshtastic-protobuf
+          path: '@wz2b/node-red-meshtastic-protobuf/*.tgz'
