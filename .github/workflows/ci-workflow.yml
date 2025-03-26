@@ -33,11 +33,11 @@ jobs:
       - name: 💾 Upload meshtastic-protobuf-core artifact
         uses: actions/upload-artifact@v4
         with:
-          name: meshtastic-protobuf-core
-          path: meshtastic-protobuf-core*.tgz
+          name: wz2b-meshtastic-protobuf-core.tgz
+          path: wz2b-meshtastic-protobuf-core*.tgz
 
       - name: 💾 Upload node-red-meshtastic-protobuf artifact
         uses: actions/upload-artifact@v4
         with:
-          name: node-red-meshtastic-protobuf
-          path: node-red-meshtastic-protobuf*.tgz
+          name: wz2b-node-red-meshtastic-protobuf.tgz
+          path: wz2b-node-red-meshtastic-protobuf*.tgz
