@@ -2,7 +2,7 @@ version: v2
 
 plugins:
   - local: protoc-gen-es
-    opt: target=js+dts,import_extension=js
+    opt: target=ts,import_extension=js
     out: src/generated
 inputs:
   - directory: src/proto

@@ -31,11 +31,8 @@ class DecryptPayloadNode extends NRTSNode {
                 return;
             }
 
-
             const data = Buffer.from(encryptedB64, 'base64');
-
             const key = Buffer.from(DEFAULT_PUBLIC_KEY, "base64");
-
             const decryptedBuffer = decryptMeshtastic(
                 payload.packet.from,
                 payload.packet.id,
@@ -44,8 +41,6 @@ class DecryptPayloadNode extends NRTSNode {
 
             //  Try to decode this as a Data packet
             const decoded = fromBinary(DataSchema, decryptedBuffer);
-
-
 
             send({
                 ...msg,
