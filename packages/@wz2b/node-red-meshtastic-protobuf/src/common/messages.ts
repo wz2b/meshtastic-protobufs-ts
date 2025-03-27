@@ -15,3 +15,9 @@ export interface DataWithText extends NodeMessageInFlow {
     payload: Data;
     text: string;
 }
+
+
+export type ApplicationMessage = (NodeMessageInFlow & Omit<Data, "payload" | "$typeName">) & {
+    $typeName: string | Message["$typeName"],
+    payload: string | Message;
+};

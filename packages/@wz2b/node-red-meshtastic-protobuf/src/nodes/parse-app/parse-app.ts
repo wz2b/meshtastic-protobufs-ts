@@ -19,7 +19,7 @@ import {
     WaypointSchema,
 } from "@wz2b/meshtastic-protobuf-core";
 import {fromBinary, JsonValue, Message} from "@bufbuild/protobuf";
-import {DataWithBody, DataWithText} from "../../common/messages";
+import {ApplicationMessage, DataWithBody, DataWithText} from "../../common/messages";
 import {GenMessage} from "@bufbuild/protobuf/codegenv1";
 
 
@@ -37,13 +37,7 @@ export const messageMap: Record<number, AnyMessageSchema> = {
     [PortNum.STORE_FORWARD_APP]: StoreAndForwardSchema,
     [PortNum.TELEMETRY_APP]: TelemetrySchema,
     [PortNum.TRACEROUTE_APP]: RouteDiscoverySchema,  // ?????
-    [PortNum.NEIGHBORINFO_APP]: NeighborInfoSchema,
-
-
-    // Not listed beacuse the response is text:
-    //      PortNum.TEXT_MESSAGE_APP
-    //      PortNum.ALERT_APP
-    //      PortNum.REPLY_APP
+    [PortNum.NEIGHBORINFO_APP]: NeighborInfoSchema
 };
 
 
@@ -63,13 +57,25 @@ class ParseAppNode extends NRTSNode {
             const handler = messageMap[packet.portnum];
 
             if (handler && packet.payload) {
-                const decoded = fromBinary(handler, packet.payload);
-                (msg as DataWithBody).application = decoded;
-                send(msg);
+                const parsed = fromBinary(handler, packet.payload);
+                const { $typeName: _ignore, ...parsedWithoutTypeName } = parsed;
+                const new_message: ApplicationMessage = {
+                    ...msg,
+                    ...packet,
+                    $typeName: parsed.$typeName, // promote the inner payload type
+                    payload: parsedWithoutTypeName as Message // strip out $typeName from payload
+                };
+
+                send(new_message);
 
             } else if ([PortNum.TEXT_MESSAGE_APP, PortNum.ALERT_APP, PortNum.REPLY_APP].includes(packet.portnum)) {
-                (msg as DataWithText).text = packet.payload?.toString();
-                send(msg);
+                const new_message: ApplicationMessage = {
+                    ...msg,
+                    ...packet,
+                    $typeName: "text",
+                    payload:  packet.payload?.toString()
+                }
+                send(new_message);
             } else {
                 done(Error("Unsupported port number")); // or log a warning about unsupported portnum
             }
