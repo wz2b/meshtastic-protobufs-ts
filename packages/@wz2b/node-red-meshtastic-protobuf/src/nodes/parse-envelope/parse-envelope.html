@@ -21,5 +21,7 @@
 
 <!-- help text -->
 <script type="text/markdown" data-help-name="meshtastic-parse-envelope">
-    This is your node's help text.
+    Quick note about channel numbers: for historical and backward compatibility reasons,
+    what appears as channel 8 on the mqtt stream is actually channel 0.  This
+    node replaces that back to 0 to make it less confusing for users of this node.
 </script>

@@ -13,11 +13,20 @@ export function decryptMeshtastic(from: number, id: number, encryptedData: Buffe
     // Construct 16-byte nonce: 8 bytes ID, 8 bytes FROM — both little-endian
     const nonce = Buffer.alloc(16);
 
-    console.log("Nonce:", nonce.toString("hex"));
-    console.log("key:  ", key.toString("hex"));
+    // The nonce process is a little confusing.  The packet ID and from are actually
+    // both 32 bits, but they are packed into 64 bits.  Because it's L.E. this
+    // means that viewed as 32-bits each you would see:
+    //  [ 32-bit id ] [ 0x00 0x00 0x00 0x00 ] [ 32-bit from ] [ 0x00 0x00 0x00 0x00 ]
+    // If there were an 'extra nonce' it would fill in the zeros right after the ID (in
+    // the middle).
+    nonce.writeBigUInt64LE(BigInt(id), 0);
+    nonce.writeBigUInt64LE(BigInt(from), 8);
 
-    nonce.writeBigUInt64LE(BigInt(id), 0);     // First 8 bytes: id
-    nonce.writeBigUInt64LE(BigInt(from), 8);   // Next 8 bytes: from
+
+
+    console.log("Nonce:", nonce.toString("hex"));
+    console.log("  key:", key.toString("hex"));
+
 
     let algorithm;
     if (key.length === 16) {
@@ -34,6 +43,6 @@ export function decryptMeshtastic(from: number, id: number, encryptedData: Buffe
         decipher.final()
     ]);
 
-    console.log("Data: ", decrypted.toString("hex"));
+    console.log("Plain:", decrypted.toString("hex"));
     return decrypted;
 }

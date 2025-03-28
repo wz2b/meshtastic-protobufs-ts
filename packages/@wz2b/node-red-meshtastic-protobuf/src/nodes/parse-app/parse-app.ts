@@ -15,7 +15,7 @@ import {
     RouteDiscoverySchema,
     RoutingSchema,
     StoreAndForwardSchema,
-    TelemetrySchema,
+    TelemetrySchema, UserSchema,
     WaypointSchema,
 } from "@wz2b/meshtastic-protobuf-core";
 import {fromBinary, JsonValue, Message} from "@bufbuild/protobuf";
@@ -26,7 +26,7 @@ import {GenMessage} from "@bufbuild/protobuf/codegenv1";
 type AnyMessageSchema = GenMessage<Message, JsonValue>;
 export const messageMap: Record<number, AnyMessageSchema> = {
     [PortNum.POSITION_APP]: PositionSchema,
-    [PortNum.NODEINFO_APP]: NodeInfoSchema,
+    [PortNum.NODEINFO_APP]: UserSchema, // not NodeInfoSchema,
     [PortNum.ROUTING_APP]: RoutingSchema,
     [PortNum.MAP_REPORT_APP]: MapReportSchema,
     [PortNum.REMOTE_HARDWARE_APP]: HardwareMessageSchema,
@@ -54,6 +54,7 @@ class ParseAppNode extends NRTSNode {
     ): Promise<void> {
         try {
             const packet = msg.payload as Data;
+            console.log("Attempting to decode portnum", packet.portnum);
             const handler = messageMap[packet.portnum];
 
             if (handler && packet.payload) {
@@ -65,7 +66,7 @@ class ParseAppNode extends NRTSNode {
                     $typeName: parsed.$typeName, // promote the inner payload type
                     payload: parsedWithoutTypeName as Message // strip out $typeName from payload
                 };
-
+                console.log("Decoded application message:", JSON.stringify(parsed, null, 2));
                 send(new_message);
 
             } else if ([PortNum.TEXT_MESSAGE_APP, PortNum.ALERT_APP, PortNum.REPLY_APP].includes(packet.portnum)) {
@@ -75,13 +76,16 @@ class ParseAppNode extends NRTSNode {
                     $typeName: "text",
                     payload:  packet.payload?.toString()
                 }
+                console.log("Parsed text message:", new_message.payload)
                 send(new_message);
             } else {
+                console.log("Unsupported port number", packet.portnum);
                 done(Error("Unsupported port number")); // or log a warning about unsupported portnum
             }
 
             done();
         } catch (err) {
+            console.log("Exception in ParseAppNode:", err);
             done(err instanceof Error ? err : new Error(String(err)));
         }
     }
