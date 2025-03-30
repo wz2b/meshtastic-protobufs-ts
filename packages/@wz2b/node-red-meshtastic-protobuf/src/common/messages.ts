@@ -4,20 +4,41 @@ import {Data, Position} from "@wz2b/meshtastic-protobuf-core";
 import * as crap from "@wz2b/meshtastic-protobuf-core";
 import {Message} from "@bufbuild/protobuf";
 
-export type ServiceEnvelopePayload = NodeMessageInFlow & any;
-
-export interface DataWithBody<T extends Message = Message> extends NodeMessageInFlow {
-    payload: Data;
-    application: T;
-}
-
-export interface DataWithText extends NodeMessageInFlow {
-    payload: Data;
-    text: string;
-}
+// export type ServiceEnvelopePayload = NodeMessageInFlow & any;
 
 
-export type ApplicationMessage = (NodeMessageInFlow & Omit<Data, "payload" | "$typeName">) & {
-    $typeName: string | Message["$typeName"],
+/*
+ * This helper type removes the `payload` and `$typeName` fields from a protobuf
+ * `Data` message. `$typeName` is added by protobuf-es for introspection and is
+ * not part of the actual Meshtastic schema. We also remove `payload` so we can
+ * override it with a decoded object or plain string in our final application message.
+ */
+type WithoutTypeNameOrPayload<T> = {
+    [K in keyof T as K extends "payload" | "$typeName" ? never : K]: T[K];
+};
+
+type DataWithoutTypeNameOrPayload = Partial<WithoutTypeNameOrPayload<Data>>;
+
+/*
+ * Represents a fully parsed Meshtastic application-level message in Node-RED.
+ *
+ * This type flattens the important fields from the `MeshPacket` and inner `Data`
+ * protobuf messages into a single object. It also allows the payload to be
+ * replaced with the decoded application message (as a protobuf `Message`)
+ * or a plain string, depending on content type.
+ *
+ * `contentType` indicates the decoded payload's type (like a content-type header).
+ */
+export type MeshtasticApplicationMessage =
+    NodeMessageInFlow
+    & DataWithoutTypeNameOrPayload
+    & {
+    channel: number;
+    rxRssi: number;
+    rxSnr: number;
+    id: number;
+    hopStart: number;
+    hopLimit: number;
+    contentType: string | Message["$typeName"];
     payload: string | Message;
 };

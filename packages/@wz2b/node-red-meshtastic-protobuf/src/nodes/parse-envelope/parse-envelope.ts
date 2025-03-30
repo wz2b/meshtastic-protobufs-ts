@@ -31,19 +31,13 @@ class ParseEnvelopeNode extends NRTSNode {
                 // should be a node option.
                 envelope.channelId = "0";
             }
-            const jsonEnvelope = toJson(ServiceEnvelopeSchema, envelope);
 
-
-
-
-            console.log("Decoded envelope:", jsonEnvelope);
-
-
+            console.log("Decoded envelope:", toJson(ServiceEnvelopeSchema, envelope));
 
             send({
                 _msgid: msg._msgid,
                 topic: msg.topic,
-                payload: jsonEnvelope
+                payload: envelope
             });
             done();
         } catch (err) {

@@ -3,9 +3,7 @@ import {DecryptPayloadNodeDef} from "./types";
 import {NodeAPI, NodeMessage, NodeMessageInFlow} from "node-red";
 import {decryptMeshtastic} from "../../common/decrypt";
 import {fromBinary} from "@bufbuild/protobuf";
-import {DataSchema, MeshPacketSchema} from "@wz2b/meshtastic-protobuf-core";
-import {ServiceEnvelopePayload} from "../../common/messages";
-import {base64Decode} from "@bufbuild/protobuf/wire";
+import {DataSchema, ServiceEnvelope} from "@wz2b/meshtastic-protobuf-core";
 
 
 export const DEFAULT_PUBLIC_KEY = "1PG7OiApB1nwvP+rz05pAQ==";
@@ -22,29 +20,51 @@ class DecryptPayloadNode extends NRTSNode {
         done: (err?: Error) => void
     ): Promise<void> {
         try {
-            const payload = msg.payload as ServiceEnvelopePayload;
-            const encryptedB64 = payload.packet?.encrypted;
-
-
-            if (typeof encryptedB64 !== "string") {
-                done(new Error("Expected base64-encoded encrypted string at payload.packet.encrypted"));
+            const payload = msg.payload as ServiceEnvelope;
+            const packet = payload.packet;
+            if (packet == null) {
+                done();
                 return;
             }
 
-            const data = Buffer.from(encryptedB64, 'base64');
+            if (packet.payloadVariant.case === "decoded") {
+                // Already decoded — pass through unchanged
+                send(msg);
+                done();
+                return;
+            }
+
+            if (packet.payloadVariant.case !== "encrypted") {
+                // We can only decrypt encrypted packets
+                done();
+                return;
+            }
+
+            const encrypted = packet.payloadVariant.value as Uint8Array;
+
+            const data = Buffer.from(encrypted);
             const key = Buffer.from(DEFAULT_PUBLIC_KEY, "base64");
             const decryptedBuffer = decryptMeshtastic(
-                payload.packet.from,
-                payload.packet.id,
+                packet.from,
+                packet.id,
                 data,
                 key);
 
             //  Try to decode this as a Data packet
             const decoded = fromBinary(DataSchema, decryptedBuffer);
 
+
+            const newPacket = {
+                ...payload.packet,
+                payloadVariant: {
+                    case: "decoded",
+                    value: decoded
+                }
+            }
+
             send({
                 ...msg,
-                payload: decoded,
+                payload: newPacket,
             });
 
             done();

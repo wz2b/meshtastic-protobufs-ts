@@ -6,20 +6,21 @@ import {
     Data,
     HardwareMessageSchema,
     MapReportSchema,
+    MeshPacket,
     ModuleConfig_AudioConfigSchema,
     NeighborInfoSchema,
-    NodeInfoSchema,
     PaxcountSchema,
     PortNum,
     PositionSchema,
     RouteDiscoverySchema,
     RoutingSchema,
     StoreAndForwardSchema,
-    TelemetrySchema, UserSchema,
+    TelemetrySchema,
+    UserSchema,
     WaypointSchema,
 } from "@wz2b/meshtastic-protobuf-core";
 import {fromBinary, JsonValue, Message} from "@bufbuild/protobuf";
-import {ApplicationMessage, DataWithBody, DataWithText} from "../../common/messages";
+import {MeshtasticApplicationMessage} from "../../common/messages";
 import {GenMessage} from "@bufbuild/protobuf/codegenv1";
 
 
@@ -53,33 +54,56 @@ class ParseAppNode extends NRTSNode {
         done: (err?: Error) => void
     ): Promise<void> {
         try {
-            const packet = msg.payload as Data;
-            console.log("Attempting to decode portnum", packet.portnum);
-            const handler = messageMap[packet.portnum];
+            const packet = msg.payload as MeshPacket;
+            if (packet == null) {
+                done();
+            } else if (packet.payloadVariant.case != "decoded") {
+                throw new Error("Can't parse packet without data");
+            }
 
-            if (handler && packet.payload) {
-                const parsed = fromBinary(handler, packet.payload);
+            const data = packet.payloadVariant.value as Data;
+
+
+            console.log("Attempting to decode portnum", data.portnum);
+            const handler = messageMap[data.portnum];
+
+            if (handler && data.payload) {
+                const parsed = fromBinary(handler, data.payload);
                 const { $typeName: _ignore, ...parsedWithoutTypeName } = parsed;
-                const new_message: ApplicationMessage = {
-                    ...msg,
-                    ...packet,
-                    $typeName: parsed.$typeName, // promote the inner payload type
+                const new_message: MeshtasticApplicationMessage = {
+                    _msgid: msg._msgid,
+                    contentType: parsed.$typeName, // promote the inner payload type
+                    source: data.source|| packet.from,
+                    dest: data.dest || packet.to,
+                    channel: packet.channel,
+                    rxRssi: packet.rxRssi,
+                    rxSnr: packet.rxSnr,
+                    id: packet.id,
+                    hopStart: packet.hopStart,
+                    hopLimit: packet.hopLimit,
                     payload: parsedWithoutTypeName as Message // strip out $typeName from payload
                 };
                 console.log("Decoded application message:", JSON.stringify(parsed, null, 2));
                 send(new_message);
 
-            } else if ([PortNum.TEXT_MESSAGE_APP, PortNum.ALERT_APP, PortNum.REPLY_APP].includes(packet.portnum)) {
-                const new_message: ApplicationMessage = {
-                    ...msg,
-                    ...packet,
-                    $typeName: "text",
-                    payload:  packet.payload?.toString()
+            } else if ([PortNum.TEXT_MESSAGE_APP, PortNum.ALERT_APP, PortNum.REPLY_APP].includes(data.portnum)) {
+                const new_message: MeshtasticApplicationMessage = {
+                    _msgid: msg._msgid,
+                    contentType: "text",
+                    source: data.source|| packet.from,
+                    dest: data.dest || packet.to,
+                    channel: packet.channel,
+                    rxRssi: packet.rxRssi,
+                    rxSnr: packet.rxSnr,
+                    id: packet.id,
+                    hopStart: packet.hopStart,
+                    hopLimit: packet.hopLimit,
+                    payload:  data.toString()
                 }
                 console.log("Parsed text message:", new_message.payload)
                 send(new_message);
             } else {
-                console.log("Unsupported port number", packet.portnum);
+                console.log("Unsupported port number", data.portnum);
                 done(Error("Unsupported port number")); // or log a warning about unsupported portnum
             }
 

@@ -11,7 +11,7 @@
     "test": "mocha --recursive --require ts-node/register test/*.ts --reporter mocha-junit-reporter --reporter-options mochaFile=coverage/junit.xml"
   },
   "author": "Christopher Piggott",
-  "license": "GPLv",
+  "license": "GPLv3",
   "dependencies": {
     "@wz2b/meshtastic-protobuf-core": "^0.0.1"
   },
