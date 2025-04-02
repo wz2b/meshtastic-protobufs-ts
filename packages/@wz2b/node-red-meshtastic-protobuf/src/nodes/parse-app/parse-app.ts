@@ -72,15 +72,17 @@ class ParseAppNode extends NRTSNode {
                 const { $typeName: _ignore, ...parsedWithoutTypeName } = parsed;
                 const new_message: MeshtasticApplicationMessage = {
                     _msgid: msg._msgid,
-                    contentType: parsed.$typeName, // promote the inner payload type
                     source: data.source|| packet.from,
                     dest: data.dest || packet.to,
-                    channel: packet.channel,
+                    channel: packet.channel == 8 ? 0 : packet.channel,
                     rxRssi: packet.rxRssi,
                     rxSnr: packet.rxSnr,
                     id: packet.id,
                     hopStart: packet.hopStart,
                     hopLimit: packet.hopLimit,
+                    portnum: data.portnum,
+
+                    contentType: parsed.$typeName, // promote the inner payload type
                     payload: parsedWithoutTypeName as Message // strip out $typeName from payload
                 };
                 console.log("Decoded application message:", JSON.stringify(parsed, null, 2));
@@ -89,15 +91,17 @@ class ParseAppNode extends NRTSNode {
             } else if ([PortNum.TEXT_MESSAGE_APP, PortNum.ALERT_APP, PortNum.REPLY_APP].includes(data.portnum)) {
                 const new_message: MeshtasticApplicationMessage = {
                     _msgid: msg._msgid,
-                    contentType: "text",
                     source: data.source|| packet.from,
                     dest: data.dest || packet.to,
-                    channel: packet.channel,
+                    channel: packet.channel == 8 ? 0 : packet.channel,
                     rxRssi: packet.rxRssi,
                     rxSnr: packet.rxSnr,
                     id: packet.id,
                     hopStart: packet.hopStart,
                     hopLimit: packet.hopLimit,
+                    portnum: data.portnum,
+
+                    contentType: "text/plain", // promote the inner payload type
                     payload:  data.toString()
                 }
                 console.log("Parsed text message:", new_message.payload)
