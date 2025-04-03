@@ -40,5 +40,7 @@ export type MeshtasticApplicationMessage =
     hopStart: number;
     hopLimit: number;
     contentType: string | Message["$typeName"];
+    channelName: string | undefined; // Make it optional to allow for missing channelName
+    gatewayId: string | undefined; // Make it optional to allow for missing gatewayId
     payload: string | Message;
 };

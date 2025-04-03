@@ -20,8 +20,8 @@ class DecryptPayloadNode extends NRTSNode {
         done: (err?: Error) => void
     ): Promise<void> {
         try {
-            const payload = msg.payload as ServiceEnvelope;
-            const packet = payload.packet;
+            const envelope = msg.payload as ServiceEnvelope;
+            const packet = envelope.packet;
             if (packet == null) {
                 done();
                 return;
@@ -55,7 +55,9 @@ class DecryptPayloadNode extends NRTSNode {
 
 
             const newPacket = {
-                ...payload.packet,
+                ...envelope.packet,
+                channelName: envelope.channelId,
+                gatewayId: envelope.gatewayId,
                 payloadVariant: {
                     case: "decoded",
                     value: decoded

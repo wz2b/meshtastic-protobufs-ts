@@ -42,6 +42,14 @@ export const messageMap: Record<number, AnyMessageSchema> = {
 };
 
 
+interface GatewayPayloadMessage {
+    gatewayId?: string;
+    channelName?: string;
+    // Add other properties as needed
+}
+
+
+
 class ParseAppNode extends NRTSNode {
     constructor(config: ParseAppNodeDef) {
         super(config);
@@ -54,7 +62,8 @@ class ParseAppNode extends NRTSNode {
         done: (err?: Error) => void
     ): Promise<void> {
         try {
-            const packet = msg.payload as MeshPacket;
+            const payload_in = msg.payload as GatewayPayloadMessage;
+            const packet = payload_in as MeshPacket;
             if (packet == null) {
                 done();
             } else if (packet.payloadVariant.case != "decoded") {
@@ -67,10 +76,14 @@ class ParseAppNode extends NRTSNode {
             console.log("Attempting to decode portnum", data.portnum);
             const handler = messageMap[data.portnum];
 
+
             if (handler && data.payload) {
                 const parsed = fromBinary(handler, data.payload);
                 const { $typeName: _ignore, ...parsedWithoutTypeName } = parsed;
-                const new_message: MeshtasticApplicationMessage = {
+
+
+
+                const app_message: MeshtasticApplicationMessage = {
                     _msgid: msg._msgid,
                     source: data.source|| packet.from,
                     dest: data.dest || packet.to,
@@ -81,15 +94,16 @@ class ParseAppNode extends NRTSNode {
                     hopStart: packet.hopStart,
                     hopLimit: packet.hopLimit,
                     portnum: data.portnum,
-
+                    gatewayId: payload_in.gatewayId,
+                    channelName: payload_in.channelName, // fallback to packet's channelName if not set
                     contentType: parsed.$typeName, // promote the inner payload type
                     payload: parsedWithoutTypeName as Message // strip out $typeName from payload
                 };
                 console.log("Decoded application message:", JSON.stringify(parsed, null, 2));
-                send(new_message);
+                send(app_message);
 
             } else if ([PortNum.TEXT_MESSAGE_APP, PortNum.ALERT_APP, PortNum.REPLY_APP].includes(data.portnum)) {
-                const new_message: MeshtasticApplicationMessage = {
+                const app_message: MeshtasticApplicationMessage = {
                     _msgid: msg._msgid,
                     source: data.source|| packet.from,
                     dest: data.dest || packet.to,
@@ -100,12 +114,13 @@ class ParseAppNode extends NRTSNode {
                     hopStart: packet.hopStart,
                     hopLimit: packet.hopLimit,
                     portnum: data.portnum,
-
+                    channelName: payload_in.channelName, // fallback to packet's channelName if not set
+                    gatewayId: payload_in.gatewayId,
                     contentType: "text/plain", // promote the inner payload type
                     payload:  data.toString()
                 }
-                console.log("Parsed text message:", new_message.payload)
-                send(new_message);
+                console.log("Parsed text message:", app_message.payload)
+                send(app_message);
             } else {
                 console.log("Unsupported port number", data.portnum);
                 done(Error("Unsupported port number")); // or log a warning about unsupported portnum
